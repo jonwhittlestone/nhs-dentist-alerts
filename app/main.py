@@ -1,9 +1,22 @@
 #!/usr/bin/env python
+from dataclasses import dataclass
 import mechanicalsoup
+
 URL = 'https://www.nhs.uk/Service-Search/Dentists/LocationSearch/3'
 ROW_CLASS_TO_OMIT = 'fctitles'
 POSTCODE = 'RH4 1JJ'
 cleaned_results = []
+
+
+@dataclass
+class Dentist:
+    '''Extracted, cleaned Dentist from results table'''
+    name: str
+    address: str
+    distance: str
+
+def empty_dentist():
+    return Dentist(name='',address='',distance='')
 
 def main():
 
@@ -37,25 +50,30 @@ def main():
     # filter to just info rows and not heading row
 
     # clean, gather results
-    dentist = {'name': '', 'address': '', 'distance': ''}
-    new_dentist = dentist
+    new_dentist = empty_dentist()
     for count, row in enumerate(rows):
 
         if count % 2 == 0:  # if odd, then start a new
-            new_dentist = dentist
+            new_dentist = empty_dentist()
             td_cells = row.select('tr>th.fctitle')
-            new_dentist['name'] = strip_newline(td_cells[0].text)
+            new_dentist.name = strip_newline(td_cells[0].text)
+
             continue
         else:
             td_cells = row.select('tr>td')
             for count, td in enumerate(td_cells):
                 if count == 0:
-                    new_dentist['address'] = strip_newline(td.get_text())
+                    new_dentist.address = strip_newline(td.get_text())
             cleaned_results.append(new_dentist)
 
-    debug=True
+        for d in cleaned_results:
+            print('-------------------')
+            print(d)
+            print('')
+            print('')
 def strip_newline(value):
     return value.replace('\n', '').replace('\r', '')
+
 
 
 if __name__ == '__main__':

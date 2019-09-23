@@ -4,5 +4,5 @@
         "titleBar.activeBackground": "#6A2B3C",
         "titleBar.activeForeground": "#FEFCFC"
     },
-    "python.pythonPath": "venv/bin/python3.6"
+    "python.pythonPath": "/home/jon/.pyenv/versions/nhs-dentist-alerts-3.7.4/bin/python"
 }
