@@ -11,6 +11,15 @@
             "cwd":"${workspaceFolder}",
             "program": "${workspaceFolder}/app/main.py",
             "console": "integratedTerminal"
+        },
+
+        {
+            "name": "test",
+            "type": "python",
+            "request": "launch",
+            "cwd":"${workspaceFolder}",
+            "program": "/home/jon/.pyenv/versions/3.7.4/envs/nhs-dentist-alerts-3.7.4/bin/pytest",
+            "console": "integratedTerminal"
         }
     ]
 }
