@@ -6,6 +6,10 @@ URL = 'https://www.nhs.uk/Service-Search/Dentists/LocationSearch/3'
 ROW_CLASS_TO_OMIT = 'fctitles'
 POSTCODE = 'RH4 1JJ'
 PER_PAGE = 100
+MAIN_ROW_COL_ORDER = ['rating', 'by_referral',
+                      'new_adult', 'new_adult_entitled', 'new_children', 'urgent_nhs']
+IMG_AVAIL_MAP = {'icon-yes': True,
+                 'icon-no': False, 'icon-question': None}
 
 
 print('==================')
@@ -13,7 +17,12 @@ print('NHS Dentist Alerts')
 print('==================')
 
 def empty_dentist():
-    return Dentist(name='',address='',distance='')
+    d = Dentist(name='', address_contact='', distance='', by_referral=None,
+                new_adult=None, new_adult_entitled=None, new_children=None, urgent_nhs=None)
+    for hdg in MAIN_ROW_COL_ORDER:
+        setattr(d, hdg, None)
+    return d
+
 
 
 def strip_newline(value):
@@ -23,8 +32,22 @@ def strip_newline(value):
 class Dentist:
     '''Extracted, cleaned Dentist from results table'''
     name: str
-    address: str
+    address_contact: str
     distance: str
+    by_referral: bool
+    new_adult: bool
+    new_adult_entitled: bool
+    new_children: bool
+    urgent_nhs: bool
+
+    def __str__(self):
+        return f"Name:\t\t\t\t{self.name}" \
+            f"\nAddress:\t\t\t{self.address_contact}" \
+            f"\nBy Referral Only:\t\t{self.by_referral}" \
+            f"\nNew Adult Only:\t\t\t{self.new_adult}" \
+            f"\nNew NHS Entitled Adult Only:\t{self.new_adult_entitled}" \
+            f"\nNew Children:\t\t\t{self.new_children}" \
+            f"\nUrgent NHS Treatments:\t\t{self.urgent_nhs}"
 
 
 class Scraper:
@@ -76,23 +99,41 @@ class Scraper:
     def update_search_per_page(self, results_page, PER_PAGE):
         return results_page
 
+    def td_contains_result_icon(self, td):
+        '''
+            Determine 'Yes,'No, N/A' from img
+            eg. <img src="..yes.png">
+        '''
+        try:
+            for c in td.contents:
+                for k, v in IMG_AVAIL_MAP.items():
+                    if k in str(c):
+                        return v
+        except Exception:
+            pass
+        return None
+
     def extract_dentists(self):
         '''clean, return data'''
         cleaned_results = []
         rows = self.results_table.select(f'tr:not(.{ROW_CLASS_TO_OMIT})')
         new_dentist = empty_dentist()
-        for count, row in enumerate(rows):
-            if count % 2 == 0:  # if odd, then start a new
+        for row_count, row in enumerate(rows):
+            if row_count % 2 == 0:  # if odd, then start a new
                 new_dentist = empty_dentist()
                 td_cells = row.select('tr>th.fctitle')
                 new_dentist.name = strip_newline(td_cells[0].text)
                 continue
             else:
                 td_cells = row.select('tr>td')
-                for count, td in enumerate(td_cells):
-                    if count == 0:
-                        new_dentist.address = strip_newline(td.get_text())
-                    cleaned_results.append(new_dentist)
+                for td_count, td in enumerate(td_cells):
+                    for adm in MAIN_ROW_COL_ORDER:
+                        setattr(new_dentist, adm,
+                                self.td_contains_result_icon(td))
+
+                    if td_count == 0:
+                        new_dentist.address_contact = strip_newline(td.get_text())
+                cleaned_results.append(new_dentist)
         return cleaned_results
 
 
