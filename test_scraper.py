@@ -15,7 +15,7 @@ class TestScraper:
 
     @fixture
     def results_page(self, scraper, browser):
-        return scraper.search_postcode(browser, POSTCODE)
+        return scraper.search_postcode(browser, POSTCODE, per_page=PER_PAGE)
 
     @fixture
     def results_table(self, scraper, browser):
@@ -60,8 +60,8 @@ class TestScraper:
         assert len(scraper.table_headings) > 0
 
     def test_i_can_extract_a_result_row_to_a_data_class(self, scraper, results_page):
-        extracted = scraper.extract_dentists()
-        dentist_data_class = extracted[0]
+        all_results, extracted = scraper.extract_dentists()
+        dentist_data_class = all_results[0]
         
         # arrange first result of table cells to
         # match to dataclass

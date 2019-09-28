@@ -18,7 +18,7 @@ print('==================')
 
 def empty_dentist():
     d = Dentist(name='', address_contact='', distance='', by_referral=None,
-                new_adult=None, new_adult_entitled=None, new_children=None, urgent_nhs=None)
+                new_adult=None, new_adult_entitled=None, new_children=None, urgent_nhs=None, all_null=True)
     for hdg in MAIN_ROW_COL_ORDER:
         setattr(d, hdg, None)
     return d
@@ -39,6 +39,8 @@ class Dentist:
     new_adult_entitled: bool
     new_children: bool
     urgent_nhs: bool
+
+    all_null: bool
 
     def __str__(self):
         return f"Name:\t\t\t\t{self.name}" \
@@ -64,7 +66,7 @@ class Scraper:
     def results_table(self, value):
         self._results_table = value
 
-    def connect(self):
+    def connect(self, per_page=None):
         browser = mechanicalsoup.StatefulBrowser(
             soup_config={'features': 'lxml'},
             raise_on_404=True,
@@ -73,12 +75,18 @@ class Scraper:
         browser.open(URL)
         return browser
     
-    def search_postcode(self, browser, postcode):
+    def search_postcode(self, browser, postcode, per_page):
         '''Search the form to give back results'''
         browser.select_form('.findcompare-search form')
         # Submit search - 25 default per_page
         browser['Location.Name'] = POSTCODE
         resp = browser.submit_selected()
+
+
+        # Todo.
+        # if per_page:
+            # update form per_page input
+            # browser.select_form('.findcompare-search form')
 
         self.results_page = browser.get_current_page()
         return self.results_page
@@ -99,7 +107,7 @@ class Scraper:
     def update_search_per_page(self, results_page, PER_PAGE):
         return results_page
 
-    def td_contains_result_icon(self, td):
+    def td_contains_result_icon(self, td, new_dentist):
         '''
             Determine 'Yes,'No, N/A' from img
             eg. <img src="..yes.png">
@@ -108,13 +116,15 @@ class Scraper:
             for c in td.contents:
                 for k, v in IMG_AVAIL_MAP.items():
                     if k in str(c):
-                        return v
+                        return v, new_dentist
         except Exception:
             pass
-        return None
+        return None, new_dentist
+
 
     def extract_dentists(self):
         '''clean, return data'''
+        all_results = []
         cleaned_results = []
         rows = self.results_table.select(f'tr:not(.{ROW_CLASS_TO_OMIT})')
         new_dentist = empty_dentist()
@@ -128,29 +138,37 @@ class Scraper:
                 td_cells = row.select('tr>td')
                 for td_count, td in enumerate(td_cells):
                     for adm in MAIN_ROW_COL_ORDER:
-                        setattr(new_dentist, adm,
-                                self.td_contains_result_icon(td))
+                        availability, new_dentist = self.td_contains_result_icon(td, new_dentist) 
+                        setattr(new_dentist, adm, availability)
+                        if (availability is not None):
+                            new_dentist.all_null = False
 
+                    # now get the address from the first column
                     if td_count == 0:
                         new_dentist.address_contact = strip_newline(td.get_text())
-                cleaned_results.append(new_dentist)
-        return cleaned_results
+                # Capture results, unless all empty
+                all_results.append(new_dentist)
+                if not new_dentist.all_null:
+                    cleaned_results.append(new_dentist)
+        return all_results, cleaned_results
 
 
 def main():
     s = Scraper(URL)
     browser = s.connect()
-    results_page = s.search_postcode(browser, POSTCODE)
+    results_page = s.search_postcode(browser, POSTCODE, per_page=PER_PAGE)
     results_table = s.results_table
     # results_page = s.update_search_per_page(PER_PAGE)
-    extracted = s.extract_dentists()
+    all_dentists, extracted = s.extract_dentists()
 
+    print(f'Found {len(extracted)} results:')
     for d in extracted:
         print('-------------------')
         print(d)
         print('')
         print('')
 
+    print(f'Found {len(extracted)} results.')
 
 
 
