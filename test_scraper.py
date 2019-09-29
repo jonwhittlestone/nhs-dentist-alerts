@@ -7,7 +7,7 @@ from app.main import (Scraper, URL, POSTCODE,
 class TestScraper:
     @fixture
     def scraper(self):
-        return Scraper(URL)
+        return Scraper(URL, ROW_CLASS_TO_OMIT)
 
     @fixture
     def browser(self, scraper):

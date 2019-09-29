@@ -14,7 +14,16 @@
         },
 
         {
-            "name": "test",
+            "name": "test - scraper",
+            "type": "python",
+            "request": "launch",
+            "cwd":"${workspaceFolder}",
+            "program": "/home/jon/.pyenv/versions/3.7.4/envs/nhs-dentist-alerts-3.7.4/bin/pytest",
+            "console": "integratedTerminal"
+        },
+
+        {
+            "name": "test - csv",
             "type": "python",
             "request": "launch",
             "cwd":"${workspaceFolder}",
