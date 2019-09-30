@@ -1,8 +1,8 @@
+
 import os
 from pytest import fixture
-from app.main import (Scraper, URL, POSTCODE, 
-                        PER_PAGE, ROW_CLASS_TO_OMIT,
-                        MAIN_ROW_COL_ORDER)
+from app.config import *
+from app.collectors import Scraper
 
 class TestScraper:
     @fixture
