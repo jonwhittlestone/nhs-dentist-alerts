@@ -14,24 +14,11 @@ Notifictions of NHS dentists accepting new patients
 4. Sanity check
     pyenv which python
 
-## Current Problem
+## Next Steps
 
-I have refactored code into separate modules.
-
-`main.py` is still the top-most module that is executed to run the main program, but I cannot have both the main program and the `pytest` tests running succesfully.
-
-The two variations are:
-
-* MAIN PROGRAM RUN **PASS** | TESTS RUN **FAIL**
-    - `collectors.py`: `from config import *`
-    - error on `pytest`:
-        - `E   ModuleNotFoundError: No module named 'config'`
-
-* MAIN PROGRAM RUN **FAIL** | TESTS RUN **PASS**
-    - `collectors.py`: `from .config import *`
-    - error on main program:
-        - `ImportError: attempted relative import with no known parent package`
-        
-        
-
-
+[ ] Add click for command line parsing, and invoke from `main()`
+[ ] Formatting output
+[ ] Add mailer like sendgrid
+[ ] Add Celery beat
+[ ] Dockerize
+[ ] Deploy
