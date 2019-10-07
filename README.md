@@ -17,8 +17,13 @@ Notifications of NHS dentists accepting new patients
 ## Next Steps
 
 [ ] Add click for command line parsing, and invoke from `main()`
+
 [ ] Formatting output
+
 [ ] Add mailer like sendgrid
+
 [ ] Add Celery beat
+
 [ ] Dockerize
+
 [ ] Deploy
