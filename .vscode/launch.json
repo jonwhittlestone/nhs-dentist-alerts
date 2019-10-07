@@ -26,9 +26,12 @@
             "name": "tests",
             "type": "python",
             "request": "launch",
-            "cwd":"${workspaceFolder}",
-            "program": "/home/jon/.pyenv/versions/3.7.4/envs/nhs-dentist-alerts-3.7.4/bin/pytest ${workspaceFolder}/test_csv.py ",
-            "console": "integratedTerminal"
+            "cwd":"${workspaceFolder}/app",
+            "program": "/home/jon/.pyenv/versions/3.7.4/envs/nhs-dentist-alerts-3.7.4/bin/pytest",
+            "console": "integratedTerminal",
+            "args": [
+                "${workspaceFolder}/app/tests/test_all.py"
+            ]
         }
     ]
 }

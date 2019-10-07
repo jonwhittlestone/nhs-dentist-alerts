@@ -15,7 +15,7 @@ class TestScraper:
 
     @fixture
     def results_page(self, scraper, browser):
-        return scraper.search_postcode(browser, POSTCODE, per_page=PER_PAGE)
+        return scraper.search_postcode(browser, MY_POSTCODE, per_page=PER_PAGE)
 
     @fixture
     def results_table(self, scraper, browser):
@@ -42,7 +42,7 @@ class TestScraper:
         h1 = results_page.select('h1')
         assert len(h1) > 0
         try:
-            assert POSTCODE in h1[0].text
+            assert MY_POSTCODE in h1[0].text
         except AssertionError as e:
             assert False
 

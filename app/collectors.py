@@ -1,7 +1,12 @@
+import csv
+import requests
+import io
 import mechanicalsoup
+import pandas as pd
 
 from config import *
 from utils import empty_dentist, Dentist, strip_newline
+
 
 class Scraper:
 
@@ -33,12 +38,6 @@ class Scraper:
         # Submit search - 25 default per_page
         browser['Location.Name'] = postcode
         resp = browser.submit_selected()
-
-
-        # Todo.
-        # if per_page:
-            # update form per_page input
-            # browser.select_form('.findcompare-search form')
 
         self.results_page = browser.get_current_page()
         return self.results_page
@@ -103,3 +102,78 @@ class Scraper:
                 if not new_dentist.all_null:
                     cleaned_results.append(new_dentist)
         return all_results, cleaned_results
+
+class CsvCollector:
+
+
+
+    def __init__(self, url):
+        self.url = url
+
+    def connect(self):
+        browser = mechanicalsoup.StatefulBrowser(
+            soup_config={'features': 'lxml'},
+            raise_on_404=True,
+            user_agent='MyBot/0.1: mysite.example.com/bot_info',
+        )
+        browser.open(self.url)
+        return browser
+
+    def search_postcode(self, browser, postcode):
+        '''Search the form to give back results'''
+        browser.select_form('.findcompare-search form')
+        # Submit search - 25 default per_page
+        browser['Location.Name'] = postcode
+        resp = browser.submit_selected()
+        self.search_form_results_url = resp.url
+        return browser.get_current_page()
+
+    @property
+    def web_url(self):
+        return self.search_form_results_url
+
+    @property
+    def csv_url(self):
+        search = '/Results/'
+        replace = '/Export/'
+        return self.web_url.replace(search,replace)
+    
+
+    def results_to_export_url(self):
+        return ''
+
+    def download_csv(self, url):
+        s=requests.get(url).content
+        return pd.read_csv(io.StringIO(s.decode('utf-8')))
+
+        # header uses numbered header cols
+        # with requests.Session() as s:
+        #     download = s.get(url)
+        #     decoded_content = download.content.decode('utf-8')
+        #     cr = csv.reader(decoded_content.splitlines(), delimiter=',')
+        #     sheet = list(cr)
+        return sheet
+
+    def listlist_to_df(self, sheet: list):
+        from pandas import DataFrame
+        self.df = DataFrame.from_records(sheet)
+        return self.df
+    
+    def headers(self):
+        rows_df = self.df.transpose()
+        self.headers = [h for h in rows_df[0]]
+        return self.headers
+
+    def admissions(self, df):
+        '''
+            Returns a dataframe with contact details
+            and admission categories
+        '''
+        cat = ADMISSION_CATEGORIES
+        return df[[
+            'Organisation Name', 
+            'PostCode', 
+            'Telephone Number', 
+        ]
+            + list(cat.values())
+        ]
