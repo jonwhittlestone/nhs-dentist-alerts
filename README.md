@@ -1,5 +1,5 @@
 # nhs-dentist-alerts
-Notifictions of NHS dentists accepting new patients
+Notifications of NHS dentists accepting new patients
 
 ## Python 3.7 virtualenv with pyenv
 1. Ensure you have Python 3.7 installed with pyenv
